@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seberla Translator</title>
+
+    <style>
+      body,
+      html {
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        margin: 0;
+        background-color: #696969;
+        color: white;
+      }
+
+      div {
+        display: flex;
+      }
+
+      #container {
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      #content {
+        flex-direction: column;
+        width: 80%;
+        gap: 2rem;
+      }
+
+      #title {
+        font-size: 24px;
+        align-self: center;
+      }
+
+      #translator {
+        justify-content: center;
+        height: 60vh;
+      }
+
+      #translator textarea {
+        font-size: 20px;
+        color: white;
+        width: 100%;
+        height: 60%;
+
+        padding: 1rem;
+        background-color: transparent;
+        border: 1px solid lightgray;
+
+        resize: none;
+      }
+
+      #translator textarea:hover {
+        cursor: text;
+      }
+
+      #translator textarea:focus {
+        cursor: text;
+        outline: none;
+      }
+
+      #spanish,
+      #seberla {
+        width: calc(50% - 0.5px);
+      }
+
+      #spanish textarea {
+        border-right: none;
+        border-radius: 10px 0 0 10px;
+      }
+
+      #seberla textarea {
+        border-radius: 0 10px 10px 0;
+      }
+    </style>
+
+    <script>
+      var keysSpanish = {
+        Q: "P",
+        W: "Q",
+        E: "W",
+        R: "E",
+        T: "R",
+        Y: "T",
+        U: "Y",
+        I: "U",
+        O: "I",
+        P: "O",
+        A: "Ñ",
+        S: "A",
+        D: "S",
+        F: "D",
+        G: "F",
+        H: "G",
+        J: "H",
+        K: "J",
+        L: "K",
+        Ñ: "L",
+        Z: "M",
+        X: "Z",
+        C: "X",
+        V: "C",
+        B: "V",
+        N: "B",
+        M: "N",
+      };
+
+      var keysSeberla = {
+        P: "Q",
+        Q: "W",
+        W: "E",
+        E: "R",
+        R: "T",
+        T: "Y",
+        Y: "U",
+        U: "I",
+        I: "O",
+        O: "P",
+        Ñ: "A",
+        A: "S",
+        S: "D",
+        D: "F",
+        F: "G",
+        G: "H",
+        H: "J",
+        J: "K",
+        K: "L",
+        L: "Ñ",
+        M: "Z",
+        Z: "X",
+        X: "C",
+        C: "V",
+        V: "B",
+        B: "N",
+        N: "M",
+      };
+    </script>
+  </head>
+  <body>
+    <div id="container">
+      <div id="content">
+        <div id="title">
+          <h1>Seberla Translator</h1>
+        </div>
+
+        <div id="translator">
+          <div id="spanish">
+            <textarea type="text"></textarea>
+          </div>
+
+          <div id="seberla">
+            <textarea type="text"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    const spanishHTML = document.querySelector("#spanish textarea");
+    const seberlaHTML = document.querySelector("#seberla textarea");
+
+    spanishHTML.addEventListener("input", (e) => {
+      exchange(spanishHTML, seberlaHTML, keysSpanish);
+    });
+
+    seberlaHTML.addEventListener("input", (e) => {
+      exchange(seberlaHTML, spanishHTML, keysSeberla);
+    });
+
+    function exchange(from, toApply, keyList) {
+      const fromText = eliminarAcentos(from.value);
+      let toApplyText = "";
+
+      for (const value of fromText) {
+        const foundChar = keyList[value.toUpperCase()];
+
+        if (value === " ") {
+          toApplyText += " ";
+        } else if (!foundChar) {
+          toApplyText += value;
+        } else {
+          if (value === value.toUpperCase()) {
+            toApplyText += foundChar;
+          }
+
+          if (value === value.toLowerCase()) {
+            toApplyText += foundChar.toLowerCase();
+          }
+        }
+      }
+
+      toApply.value = toApplyText;
+    }
+
+    function eliminarAcentos(texto) {
+      if (!texto) {
+        return texto;
+      }
+
+      let tempText = texto.replace(/Ñ/g, "@@N_TEMP@@");
+      tempText = tempText.replace(/ñ/g, "@@n_temp@@");
+
+      let textoProcesado = tempText
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      textoProcesado = textoProcesado.replace(/@@N_TEMP@@/g, "Ñ");
+      textoProcesado = textoProcesado.replace(/@@n_temp@@/g, "ñ");
+
+      return textoProcesado;
+    }
+  </script>
+</html>
