@@ -203,7 +203,7 @@
         const arrayText = fromText.split('\n');
 
         for (const sliceText of arrayText) {
-          if (sliceText.slice(0, 9) === '( |º|º| )') {
+          if (sliceText.slice(0, 1) === 'º') {
             toApplyText += translateLine(sliceText);
           } else {
             toApplyText += sliceText;
