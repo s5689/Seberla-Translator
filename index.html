@@ -37,12 +37,23 @@
       }
 
       #jsqminsb {
+        position: relative;
         margin-bottom: 1rem;
         user-select: none;
       }
 
       #jsqminsb input {
         margin-right: 0.5rem;
+      }
+
+      #jsqminsb button {
+        display: none;
+        position: absolute;
+        right: 0;
+      }
+
+      #jsqminsb button[show] {
+        display: block;
       }
 
       #translator {
@@ -166,6 +177,8 @@
           <div id="jsqminsb">
             <input type="checkbox" name="jsqminsb-checkbox" id="jsqminsb-checkbox" />
             <label for="jsqminsb-checkbox">Juro Solemnemente Que Mis Intenciones No Son Buenas</label>
+
+            <button>Proceder</button>
           </div>
 
           <div id="languages-container">
@@ -186,62 +199,75 @@
     const spanishHTML = document.querySelector('#spanish textarea');
     const seberlaHTML = document.querySelector('#seberla textarea');
     const jsqminsb_Checkbox = document.querySelector('#jsqminsb input');
+    const jsqminsb_Button = document.querySelector('#jsqminsb button');
+    const changes = { spanish: 0, seberla: 0 };
 
+    // Eventos
     spanishHTML.addEventListener('input', (e) => {
       exchange(spanishHTML, seberlaHTML, keysSpanish);
+      changes.spanish = new Date().getTime();
     });
 
     seberlaHTML.addEventListener('input', (e) => {
       exchange(seberlaHTML, spanishHTML, keysSeberla);
+      changes.seberla = new Date().getTime();
     });
 
-    function exchange(from, toApply, keyList) {
-      const fromText = eliminarAcentos(from.value);
-      let toApplyText = '';
+    jsqminsb_Checkbox.addEventListener('change', (e) => {
+      if (jsqminsb_Checkbox.checked) jsqminsb_Button.setAttribute('show', '');
+      else jsqminsb_Button.removeAttribute('show');
 
+      exchange(spanishHTML, seberlaHTML, keysSpanish);
+    });
+
+    jsqminsb_Button.addEventListener('click', (e) => {
+      exchange(null, null, null, true);
+    });
+
+    // Funciones
+    function exchange(from, toApply, keyList, is_jsqminsb_Button) {
       // jsqminsb
-      if (jsqminsb_Checkbox.checked) {
-        const arrayText = fromText.split('\n');
+      if (jsqminsb_Checkbox.checked && is_jsqminsb_Button) {
+        (async () => {
+          const PASS = 'que-miras-cabezon-cara-de-bobo-?';
 
-        for (const sliceText of arrayText) {
-          if (sliceText.slice(0, 1) === 'º') {
-            toApplyText += translateLine(sliceText);
+          if (changes.spanish > changes.seberla) {
+            const encrypter = new age.Encrypter();
+            encrypter.setPassphrase(PASS);
+
+            seberlaHTML.value = age.armor.encode(await encrypter.encrypt(spanishHTML.value));
           } else {
-            toApplyText += sliceText;
+            const decrypter = new age.Decrypter();
+            decrypter.addPassphrase(PASS);
+
+            spanishHTML.value = await decrypter.decrypt(age.armor.decode(seberlaHTML.value), 'text');
           }
-
-          toApplyText += '\n';
-        }
+        })();
       }
-      // Seberla comun
+      // Seberla
       else {
-        toApplyText += translateLine(fromText);
-      }
-
-      toApply.value = toApplyText;
-
-      function translateLine(fromText) {
-        let toReturn = '';
+        const fromText = eliminarAcentos(from.value);
+        let toApplyText = '';
 
         for (const value of fromText) {
           const foundChar = keyList[value.toUpperCase()];
 
           if (value === ' ') {
-            toReturn += ' ';
+            toApplyText += ' ';
           } else if (!foundChar) {
-            toReturn += value;
+            toApplyText += value;
           } else {
             if (value === value.toUpperCase()) {
-              toReturn += foundChar;
+              toApplyText += foundChar;
             }
 
             if (value === value.toLowerCase()) {
-              toReturn += foundChar.toLowerCase();
+              toApplyText += foundChar.toLowerCase();
             }
           }
         }
 
-        return toReturn;
+        toApply.value = toApplyText;
       }
     }
 
